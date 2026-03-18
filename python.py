@@ -80,7 +80,7 @@ chain_report['MARKET_SHARE_PCT'] = (chain_report['TOTAL_HOURS'] / total_state_ho
 chain_report = chain_report.sort_values(by='TOTAL_HOURS', ascending=False).head(10)
 
 print(f"📊 Top 10 Chains identified out of {total_state_hours:,.0f} total hours.")
-display(chain_report)
+print(chain_report)
 
 # COMMAND ----------
 
