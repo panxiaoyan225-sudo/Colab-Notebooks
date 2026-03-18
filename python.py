@@ -128,7 +128,7 @@ final_report.columns = ['CMS_ID', 'Facility_Name', 'Admin_Name', 'Admin_Email', 
 final_report = final_report.sort_values(by='Total_Hours', ascending=False)
 
 print(f"✅ Report Generated: Matched {final_report['Admin_Name'].notna().sum()} administrator contacts.")
-display(final_report)
+print(final_report)
 
 # COMMAND ----------
 
