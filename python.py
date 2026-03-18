@@ -131,54 +131,55 @@ print(f"✅ Report Generated: Matched {final_report['Admin_Name'].notna().sum()}
 print(final_report)
 
 # COMMAND ----------
-
 # COMMAND ----------
-# CELL: Enhanced Interactive Facility Map
+# CELL: Interactive Facility Map (Using Notebook Variable Names)
 
 import plotly.express as px
 import pandas as pd
 
-# 1. Reuse the map_df from the previous cell
-# (Assuming map_df is already merged and cleaned)
+# 1. Prepare the data for the map
+# We use 'CMS_ID' which was created in your Cell 1
+facility_hours = df_pbj.groupby("CMS_ID")["TOTAL_HOURS"].sum().reset_index()
 
-# 2. Render with High-Contrast Settings
+# 2. Merge with df_fac to get coordinates (Latitude/Longitude) and Name
+# We dynamically find the Name, City, and Zip columns to avoid KeyErrors
+name_col = [c for c in df_fac.columns if 'NAME' in c and 'CLEAN' not in c][0]
+city_col = [c for c in df_fac.columns if 'CITY' in c][0]
+zip_col = [c for c in df_fac.columns if 'ZIP' in c or 'POSTAL' in c][0]
+
+map_df = pd.merge(
+    facility_hours,
+    df_fac[['CMS_ID', name_col, city_col, zip_col, 'LATITUDE', 'LONGITUDE']],
+    on="CMS_ID",
+    how="inner"
+)
+
+# 3. Clean coordinates (Ensure they are numbers, not strings)
+map_df['LATITUDE'] = pd.to_numeric(map_df['LATITUDE'], errors='coerce')
+map_df['LONGITUDE'] = pd.to_numeric(map_df['LONGITUDE'], errors='coerce')
+map_df = map_df.dropna(subset=['LATITUDE', 'LONGITUDE'])
+
+# 4. Create the Interactive Map
 fig = px.scatter_mapbox(
     map_df,
     lat="LATITUDE",
     lon="LONGITUDE",
     size="TOTAL_HOURS",
     color="TOTAL_HOURS",
-    
-    # Visual Improvements:
-    # 'Plasma' or 'Viridis' provide better visibility than the default
-    color_continuous_scale=px.colors.sequential.Plasma, 
-    size_max=15,             # Makes the largest dots stand out more
-    opacity=0.7,             # Allows you to see overlapping facilities
-    
     hover_name=name_col,
     hover_data={
         city_col: True, 
-        "TOTAL_HOURS": ":,.0f", # Added comma for thousands separator
+        zip_col: True, 
+        "TOTAL_HOURS": ":.2f",
         "LATITUDE": False, 
         "LONGITUDE": False
     },
     zoom=3.5,
-    
-    # Change style to 'open-street-map' or 'dark' for better contrast
-    mapbox_style="carto-positron", 
-    title="<b>Nursing Facility Staffing Volume</b><br><sup>Size and color represent total PBJ hours</sup>"
+    mapbox_style="carto-positron",
+    color_continuous_scale=px.colors.sequential.Viridis,
+    title="Nursing Facility Staffing Volume Map"
 )
 
-# 3. UI Tweaks
-fig.update_layout(
-    margin={"r":0,"t":80,"l":0,"b":0},
-    coloraxis_colorbar=dict(
-        title="Total Hours",
-        thicknessmode="pixels", thickness=15,
-        lenmode="fraction", len=0.6,
-        yanchor="top", y=1,
-        ticks="outside"
-    )
-)
-
+# Optimize layout
+fig.update_layout(margin={"r":0,"t":50,"l":0,"b":0})
 fig.show()
