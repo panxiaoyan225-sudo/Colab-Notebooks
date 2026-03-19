@@ -1,4 +1,8 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "2"
+# ///
 # FINAL ROBUST LOCAL PANDAS PORT
 
 import pandas as pd
@@ -55,9 +59,40 @@ try:
     print("✅ Success: Data matched dynamically.")
     display(final_output[['CMS_ID', 'FAC_NAME_CLEAN', 'FACADMIN', 'CONTACT_EMAIL', 'TOTAL_HOURS']])
 
+    # --- CLEAN COLUMN NAMES FOR DELTA LAKE ---
+      # --- save to a mane=gebale table for a dashboards ---
+    # This removes () , ; {} and spaces to make Delta happy
+    final_output.columns = (final_output.columns
+                            .str.replace(r'[();,{} ]', '_', regex=True)
+                            .str.replace(r'_+', '_', regex=True)
+                            .str.strip('_'))
+
+    # Now the rest of your save code...
+    target_catalog = "workspace"
+    target_schema = "default"
+
+    spark.sql(f"CREATE SCHEMA IF NOT EXISTS {target_catalog}.{target_schema}")
+    table_name = f"{target_catalog}.{target_schema}.top_100_facilities"
+
+    spark_df = spark.createDataFrame(final_output)
+    (spark_df.write
+    .format("delta")
+    .mode("overwrite")
+    .option("overwriteSchema", "true") 
+    .saveAsTable(table_name))
+
+    print(f"✅ Table successfully created: {table_name}")
+    
 except Exception as e:
     print(f"❌ Error Detail: {e}")
     print(f"Detected Hour Columns: {hour_cols}")
+
+
+
+# COMMAND ----------
+
+# View the first 10 rows of your newly saved table
+display(spark.sql(f"SELECT * FROM {table_name} LIMIT 10"))
 
 # COMMAND ----------
 
@@ -193,3 +228,8 @@ fig = px.scatter_mapbox(
 # Optimize layout
 fig.update_layout(margin={"r":0,"t":50,"l":0,"b":0})
 fig.show()
+
+# COMMAND ----------
+
+# Run this to see your actual available catalog names
+display(spark.sql("SHOW CATALOGS"))
