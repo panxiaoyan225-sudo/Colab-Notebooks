@@ -3,7 +3,7 @@ name: Daily Staffing Data Sync
 on:
   schedule:
     # This runs at 00:00 UTC every day (7:00 PM or 8:00 PM EST)
-    - cron: '30 22 * * *'
+    - cron: '50 12 * * *'
   workflow_dispatch: # Allows you to run it manually from GitHub for testing
 
 jobs:
