@@ -2,7 +2,8 @@
 # Ignore venv and .env in any folder or subfolder
 **/venv/
 **/.env
-**/.csv
+**/*.csv
+**/*.html
 
 # Specific to your screenshot (optional but good practice)
 **/.streamlit/secrets.toml
