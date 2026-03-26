@@ -5,9 +5,9 @@ on:
     branches:
       - main  # Triggers the workflow every time you push code to main
   schedule:
-    # This runs at 13:50 UTC every day
-    - cron: '50 13 * * *'
-  workflow_dispatch: # Allows you to run it manually from GitHub for testing
+    # Daily run at 07:00 AM Ottawa (11:00 UTC)
+    - cron: '0 11 * * *'
+  workflow_dispatch: # Keep this so you can still run it manually
 
 jobs:
   build:
