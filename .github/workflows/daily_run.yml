@@ -5,8 +5,8 @@ on:
     branches:
       - main  # Triggers the workflow every time you push code to main
   schedule:
-    # Daily run at 09:00 AM Ottawa (13:00 UTC)
-    - cron: '0 13 * * *'
+    # Runs at 00:00 UTC on January 1st every year
+    - cron: '0 0 1 1 *'
   workflow_dispatch: # Keep this so you can still run it manually
 
 jobs:
